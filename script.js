@@ -64,9 +64,7 @@ window.onload = function(){
             }
         }
     }
-
     
-
     class Coche {
         constructor(x, y, alto, ancho, velocidad, color) {
             this.x = x;
