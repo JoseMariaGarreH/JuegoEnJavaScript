@@ -3,7 +3,7 @@ window.onload = function(){
     let canvas;
     let ctx;
 
-    let nCoches = [];
+    let nObstaculos  = [];
 
     const LIMITEIZQUIERDA = 0;
     const LIMITEDERECHA = 555;
@@ -64,8 +64,8 @@ window.onload = function(){
             }
         }
     }
-    
-    class Coche {
+
+    class Obstaculos {
         constructor(x, y, alto, ancho, velocidad, color) {
             this.x = x;
             this.y = y;
@@ -94,29 +94,41 @@ window.onload = function(){
         }
     }
     
-    function iniciarCoches() {
+    function iniciarObstaculos() {
         // Primera fila de coches
         for(let i = 0;i < 2;i++){
             let x = i * 350;
-            nCoches.push(new Coche(x, 250, 50, 120, 2, "#000000"));
+            nObstaculos.push(new Obstaculos(x, 250, 50, 120, 1, "blue"));
         }
         // Segunda fila de coches
         for (let i = 0; i < 2; i++) {
             let x = i * 300;
-            nCoches.push(new Coche(x, 200, 50, 120, -2, "#000000"));
+            nObstaculos.push(new Obstaculos(x, 200, 50, 120, -2, "blue"));
         }
         // Tercera fila de coches
         for (let i = 0; i < 2; i++) {
             let x = i * 400;
-            nCoches.push(new Coche(x, 150, 50, 120, 2, "#000000"));
+            nObstaculos.push(new Obstaculos(x, 150, 50, 120, 2, "blue"));
+        }
+
+        // Cuarta fila de troncos
+        for (let i = 0; i < 2; i++) {
+            let x = i * 450;
+            nObstaculos.push(new Obstaculos(x, 100, 50, 120, 0.7, "blue"));
+        }
+
+        // Quinta fila de troncos
+        for (let i = 0; i < 2; i++) {
+            let x = i * 500;
+            nObstaculos.push(new Obstaculos(x, 50, 50, 50, 1, "blue"));
         }
     }
-    iniciarCoches();
+    iniciarObstaculos();
 
-    function manejarCoches() {
-        for (let i = 0; i < nCoches.length; i++) {
-            nCoches[i].actualizar();
-            nCoches[i].dibujar();
+    function movimientoObstaculos() {
+        for (let i = 0; i < nObstaculos.length; i++) {
+            nObstaculos[i].actualizar();
+            nObstaculos[i].dibujar();
         }
     }
 
@@ -150,8 +162,7 @@ window.onload = function(){
             50,                        // Ancho deseado en el canvas (escala a 50)
             50                         // Alto deseado en el canvas (escala a 50)
         );
-
-        manejarCoches();
+        movimientoObstaculos();
     }
     function saltar() {		
         if(yArriba){
