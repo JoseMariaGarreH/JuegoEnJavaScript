@@ -1,4 +1,5 @@
 #canvas { 
+    background-image: url('background.png');
     border: solid 1px #000; 
     margin: 20px; 
 }
