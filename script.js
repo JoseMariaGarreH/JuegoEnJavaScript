@@ -6,9 +6,12 @@ window.onload = function(){
     let nCoches = [];
 
     const LIMITEIZQUIERDA = 0;
-    const LIMITEDERECHA = 575;
+    const LIMITEDERECHA = 555;
     const LIMITEARRIBA = 0;
-    const LIMITEABAJO = 375;
+    const LIMITEABAJO = 355;
+
+    const LIMITECOCHEIZQUIERDA = -200;
+    const LIMITECOCHEDERECHA = 600;
 
     let xDerecha;
     let xIzquierda;
@@ -28,39 +31,41 @@ window.onload = function(){
             this.x = canvas.width / 2;
             this.y = 350;
             this.velocidad = 20;
-            this.animacionRana = [[72,69],[317,68],[65,319],[267,317],[59,570],[310,568],[71,818],[318,765]];
-            this.tamañoX = 120;
-            this.tamañoY = 120;
+            this.animacionRana = [[72,69],[317,68],[65,319],[265,317],[59,570],[310,568],[71,818],[318,765]];
+            this.tamañoX = 200;
+            this.tamañoY = 200;
+        }
+
+        generaPosicionDerecha(){
+            this.x += this.velocidad;
+            if(this.x > LIMITEDERECHA){
+                this.x = LIMITEDERECHA;
+            }
+        }
+    
+        generaPosicionIzquierda(){
+            this.x -= this.velocidad;
+            if(this.x < LIMITEIZQUIERDA){
+                this.x = LIMITEIZQUIERDA;
+            }
+        }
+    
+        generaPosicionArriba(){
+            this.y -= this.velocidad;
+            if(this.y < LIMITEARRIBA){
+                this.y = LIMITEARRIBA;
+            }
+        }
+    
+        generaPosicionAbajo(){
+            this.y += this.velocidad;
+            if(this.y > LIMITEABAJO){
+                this.y = LIMITEABAJO;
+            }
         }
     }
 
-    Rana.prototype.generaPosicionDerecha = function() {
-        this.x += this.velocidad;
-        if(this.x > LIMITEDERECHA){
-            this.x = LIMITEDERECHA;
-        }
-    }
-
-    Rana.prototype.generaPosicionIzquierda = function() {
-        this.x -= this.velocidad;
-        if(this.x < LIMITEIZQUIERDA){
-            this.x = LIMITEIZQUIERDA;
-        }
-    }
-
-    Rana.prototype.generaPosicionArriba = function() {
-        this.y -= this.velocidad;
-        if(this.y < LIMITEARRIBA){
-            this.y = LIMITEARRIBA;
-        }
-    }
-
-    Rana.prototype.generaPosicionAbajo = function() {
-        this.y += this.velocidad;
-        if(this.y > LIMITEABAJO){
-            this.y = LIMITEABAJO;
-        }
-    }
+    
 
     class Coche {
         constructor(x, y, alto, ancho, velocidad, color) {
@@ -80,31 +85,32 @@ window.onload = function(){
         actualizar() {
             this.x += this.velocidad;
             if(this.velocidad > 0){
-                if (this.x > LIMITEDERECHA + this.ancho) {
-                    this.x = LIMITEIZQUIERDA;
+                if (this.x > LIMITECOCHEDERECHA + this.ancho) {
+                    this.x = LIMITECOCHEIZQUIERDA;
                 }
             }else{
-                if (this.x < LIMITEIZQUIERDA - this.ancho) {
-                    this.x = LIMITEDERECHA;
+                if (this.x < LIMITECOCHEIZQUIERDA - this.ancho) {
+                    this.x = LIMITECOCHEDERECHA;
                 }
             }
         }
     }
     
-    function iniciarCoches(){
-        for(let i = 0; i < 2; i++){
+    function iniciarCoches() {
+        // Primera fila de coches
+        for(let i = 0;i < 2;i++){
             let x = i * 350;
-            nCoches.push(new Coche(x,250,50,120,1,"#000000"));
+            nCoches.push(new Coche(x, 250, 50, 120, 2, "#000000"));
         }
-
-        for(let i = 0; i < 2; i++){
+        // Segunda fila de coches
+        for (let i = 0; i < 2; i++) {
             let x = i * 300;
-            nCoches.push(new Coche(x,200,50,120,-2,"#000000"));
+            nCoches.push(new Coche(x, 200, 50, 120, -2, "#000000"));
         }
-
-        for(let i = 0; i < 2; i++){
+        // Tercera fila de coches
+        for (let i = 0; i < 2; i++) {
             let x = i * 400;
-            nCoches.push(new Coche(x,150,50,120,2,"#000000"));
+            nCoches.push(new Coche(x, 150, 50, 120, 2, "#000000"));
         }
     }
     iniciarCoches();
@@ -137,17 +143,35 @@ window.onload = function(){
         }
         ctx.drawImage(
             rana.imagen,               // Imagen completa con todos los sprites
-            rana.animacionRana[0][0],  // Posición X del sprite en la hoja de sprites
-            rana.animacionRana[0][1],  // Posición Y del sprite en la hoja de sprites
+            rana.animacionRana[posicion][0],  // Posición X del sprite en la hoja de sprites
+            rana.animacionRana[posicion][1],  // Posición Y del sprite en la hoja de sprites
             rana.tamañoX,              // Ancho del sprite en la hoja de sprites (100 en este caso)
             rana.tamañoY,              // Alto del sprite en la hoja de sprites (100 en este caso)
             rana.x,                    // Posición X en el canvas
             rana.y,                    // Posición Y en el canvas
-            40,                        // Ancho deseado en el canvas (escala a 40)
-            40                         // Alto deseado en el canvas (escala a 40)
+            50,                        // Ancho deseado en el canvas (escala a 50)
+            50                         // Alto deseado en el canvas (escala a 50)
         );
 
         manejarCoches();
+    }
+    function saltar() {		
+        if(yArriba){
+            inicial = 0;
+        }
+
+        if(xDerecha){
+            inicial = 2;
+        }
+
+        if(xIzquierda){
+            inicial = 4;
+        }
+        
+        if(yAbajo){
+            inicial = 6;
+        }
+        posicion = inicial + (posicion + 1) % 2;
     }
 
     function activarMovimiento(evt){
@@ -155,18 +179,22 @@ window.onload = function(){
             // Flecha derecha activada
 			case 39:
 				xDerecha = true;
+                saltar();
 				break;
             // Flecha izquierda activada
 			case 37:
 				xIzquierda = true;
+                saltar();
 				break;
 			// Flecha de abajo activada
 			case 40:
 				yAbajo = true;
+                saltar();
 				break;
 			// Flecha de arriba activada
 			case 38:
 				yArriba = true;
+                saltar();
 				break; 
         }
     }
