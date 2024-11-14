@@ -5,9 +5,9 @@ window.onload = function(){
     let nObstaculos  = [];
 
     const LIMITEIZQUIERDA = 0;
-    const LIMITEDERECHA = 555;
+    const LIMITEDERECHA = 565;
     const LIMITEARRIBA = 0;
-    const LIMITEABAJO = 355;
+    const LIMITEABAJO = 365;
 
     const LIMITECOCHEIZQUIERDA = -200;
     const LIMITECOCHEDERECHA = 600;
@@ -17,6 +17,11 @@ window.onload = function(){
 
     let posicion = 0; 
     let inicial = 0;
+
+    let xDerecha;
+    let xIzquierda;
+    let yAbajo;
+    let yArriba;
 
     let idRana;
 
@@ -126,53 +131,93 @@ window.onload = function(){
 
     function pintarPersonaje(){
         ctx.clearRect(0, 0, 600, 400);
+        
         ctx.fillStyle = "green";
         ctx.fillRect(rana.x,rana.y,rana.tamañoX,rana.tamañoY);
-        ctx.drawImage(
+        /*ctx.drawImage(
             rana.imagen,
             rana.animacionRana[posicion][0],
             rana.animacionRana[posicion][1],
-            rana.tamañoX,
-            rana.tamañoY,
+            111,
+            111,
             rana.x,
             rana.y,
-            40,
-            40
-        );
+            rana.tamañoX,
+            rana.tamañoY
+        );*/
         movimientoObstaculos();
     }
 
-    function saltar() {
+    function movimimientoRana() {
+        if(xDerecha){
+            inicial = 2;
+            rana.moverDerecha();
+        }
+
+        if(xIzquierda){
+            inicial = 4;
+            rana.moverIzquierda();
+        }
+
+        if(yArriba){
+            inicial = 0;
+            rana.moverArriba();
+        }
+
+        if(yAbajo){
+            inicial = 6
+            rana.moverAbajo();
+        }
+
         posicion = inicial + (posicion + 1) % 2;
     }
 
     function activarMovimiento(evt) {
         switch(evt.keyCode) {
             case 39: // Derecha
-                rana.moverDerecha();
-                inicial = 2;
-                saltar();
+                xDerecha = true;
                 break;
             case 37: // Izquierda
-                rana.moverIzquierda();
-                inicial = 4;
-                saltar();
+                xIzquierda = true;
                 break;
             case 40: // Abajo
-                rana.moverAbajo();
-                inicial = 6;
-                saltar();
+                yAbajo = true;
                 break;
             case 38: // Arriba
-                rana.moverArriba();
-                inicial = 0;
-                saltar();
+                yArriba = true;
+                
                 break; 
         }
-        pintarPersonaje(); // Actualizamos el canvas después de cada movimiento
+        movimimientoRana();
+    }
+
+    function desactivarMovimiento(evt) {
+        switch(evt.keyCode) {
+            case 39: // Derecha
+                xDerecha = false;
+                break;
+            case 37: // Izquierda
+                xIzquierda = false;
+                break;
+            case 40: // Abajo
+                yAbajo = false;
+                break;
+            case 38: // Arriba
+                yArriba = false;
+                break; 
+        }
     }
 
     document.addEventListener("keydown", activarMovimiento, false);
+    document.addEventListener("keyup", desactivarMovimiento, false);
+
+    const botonIniciar = document.getElementById("seccionBotones").getElementsByTagName("button")[0];
+    botonIniciar.addEventListener('click',() => {
+        idRana = setInterval(pintarPersonaje, 1000 / 50);
+    })
+
+    const botonReiniciar = document.getElementById("seccionBotones").getElementsByTagName("button")[1];
+    const botonPausar = document.getElementById("seccionBotones").getElementsByTagName("button")[2];
 
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
@@ -182,5 +227,5 @@ window.onload = function(){
     Rana.prototype.imagen = imagen;
     rana = new Rana();
 
-    idRana = setInterval(pintarPersonaje, 1000 / 50);
+    
 }

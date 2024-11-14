@@ -3,3 +3,8 @@
     border: solid 1px #000; 
     margin: 20px; 
 }
+
+#seccionBotones {
+        float: left;
+        margin-left: 20px;
+}
