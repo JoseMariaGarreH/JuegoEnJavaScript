@@ -1,10 +1,15 @@
 #canvas { 
-    background-image: url('background.png');
+    background-image: url('imagenes/background.png');
     border: solid 1px #000; 
     margin: 20px; 
 }
 
 #seccionBotones {
-        float: left;
-        margin-left: 20px;
+    display: flex;
+    justify-content: left;
+    margin-left: 20px;
+}
+
+section > *{
+    margin: 2px;
 }

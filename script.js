@@ -2,7 +2,7 @@ window.onload = function(){
     let canvas;
     let ctx;
 
-    let nObstaculos  = [];
+    let nObstaculos = [];
 
     const LIMITEIZQUIERDA = 0;
     const LIMITEDERECHA = 565;
@@ -23,13 +23,15 @@ window.onload = function(){
     let yAbajo;
     let yArriba;
 
+    let pausa;
+
     let idRana;
 
     class Rana {
         constructor(){
             this.x = canvas.width / 2;
             this.y = 350;
-            this.velocidad = 40;
+            this.velocidad = 50;
             this.animacionRana = [[72,69],[317,68],[65,319],[265,317],[59,570],[310,568],[71,818],[318,765]];
             this.tamañoX = 40;
             this.tamañoY = 40;
@@ -65,13 +67,14 @@ window.onload = function(){
     }
 
     class Obstaculos {
-        constructor(x, y, alto, ancho, velocidad, color) {
+        constructor(x, y, alto, ancho, velocidad, color,tipo) {
             this.x = x;
             this.y = y;
             this.alto = alto;
             this.ancho = ancho;
             this.velocidad = velocidad;
             this.color = color;
+            this.tipo = tipo;
         }
     
         dibujar() {
@@ -92,32 +95,32 @@ window.onload = function(){
             }
         }
     }
-    
+
     function iniciarObstaculos() {
         // Primera fila de coches
         for(let i = 0; i < 2; i++) {
             let x = i * 350;
-            nObstaculos.push(new Obstaculos(x, 250, 50, 120, 1, "blue"));
+            nObstaculos.push(new Obstaculos(x, 250, 50, 120, 1, "blue","vehiculo"));
         }
         // Segunda fila de coches
         for (let i = 0; i < 2; i++) {
             let x = i * 300;
-            nObstaculos.push(new Obstaculos(x, 200, 50, 120, -2, "blue"));
+            nObstaculos.push(new Obstaculos(x, 200, 50, 120, -2, "blue","vehiculo"));
         }
         // Tercera fila de coches
         for (let i = 0; i < 2; i++) {
             let x = i * 400;
-            nObstaculos.push(new Obstaculos(x, 150, 50, 120, 2, "blue"));
+            nObstaculos.push(new Obstaculos(x, 150, 50, 120, 2, "blue","vehiculo"));
         }
         //Cuarta fila de troncos
         for (let i = 0; i < 2; i++) {
             let x = i * 450;
-            nObstaculos.push(new Obstaculos(x, 100, 50, 120, 0.7, "blue"));
+            nObstaculos.push(new Obstaculos(x, 100, 50, 120, 0.7, "blue","tronco"));
         }
         // Quita fila de troncos
         for (let i = 0; i < 2; i++) {
             let x = i * 500;
-            nObstaculos.push(new Obstaculos(x, 50, 50, 50, 1, "blue"));
+            nObstaculos.push(new Obstaculos(x, 50, 50, 50, 1, "blue","tronco"));
         }
     }
     iniciarObstaculos();
@@ -146,6 +149,13 @@ window.onload = function(){
             rana.tamañoY
         );*/
         movimientoObstaculos();
+
+        if (ranaMuerta()) {
+			clearInterval(idRana);
+			botonPausar.disabled = true;
+            botonIniciar.disabled = true;
+            botonReiniciar.disabled = false;
+		}
     }
 
     function movimimientoRana() {
@@ -208,24 +218,81 @@ window.onload = function(){
         }
     }
 
-    document.addEventListener("keydown", activarMovimiento, false);
-    document.addEventListener("keyup", desactivarMovimiento, false);
 
-    const botonIniciar = document.getElementById("seccionBotones").getElementsByTagName("button")[0];
-    botonIniciar.addEventListener('click',() => {
-        idRana = setInterval(pintarPersonaje, 1000 / 50);
-    })
+    function ranaMuerta() {
+		let estamosMuertos = false;
+		
+		let i = 0;
 
-    const botonReiniciar = document.getElementById("seccionBotones").getElementsByTagName("button")[1];
-    const botonPausar = document.getElementById("seccionBotones").getElementsByTagName("button")[2];
+		let bIzq  = rana.x;
+		let bDer  = rana.x + rana.tamañoX;
+		let bDown = rana.y;
+		let bUp   = rana.y + rana.tamañoY;
+
+		do {
+			let nIzq  = Math.round(nObstaculos[i].x,0);
+			let nDer  = Math.round((nObstaculos[i].x + nObstaculos[i].ancho),0);
+			let nDown   = Math.round(nObstaculos[i].y,0);
+			let nUp = Math.round((nObstaculos[i].y + nObstaculos[i].alto),0);
+			
+			if (( bDer  > nIzq ) &
+					( bIzq  < nDer ) &
+					( bUp   > nDown) &
+					( bDown < nUp) ) {
+				
+				estamosMuertos = true;
+				
+			} else i++;
+		}
+		while (!estamosMuertos);	
+		
+		return estamosMuertos;
+	}
 
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
 
+    let botonIniciar = document.getElementById("seccionBotones").getElementsByTagName("button")[0];
+    let botonPausar = document.getElementById("seccionBotones").getElementsByTagName("button")[1];
+    let botonReiniciar = document.getElementById("seccionBotones").getElementsByTagName("button")[2];
+
+    botonIniciar.disabled = false;
+    botonPausar.disabled = true;
+    botonReiniciar.disabled = true;
+
+    document.addEventListener("keydown", activarMovimiento, false);
+    document.addEventListener("keyup", desactivarMovimiento, false);
+
     imagen = new Image();
-    imagen.src = "frogger.png";
+    imagen.src = "imagenes/frogger.png";
     Rana.prototype.imagen = imagen;
     rana = new Rana();
 
-    
+    botonIniciar.addEventListener('click',() => {
+        idRana = setInterval(pintarPersonaje, 1000 / 50);
+        botonIniciar.disabled = true;
+        botonPausar.disabled = false;
+    });
+
+    botonPausar.addEventListener('click',() => {
+        pausa = !pausa;
+        if(pausa){
+            clearInterval(idRana);
+            ctx.fillStyle = "rgba(128, 128, 128, 0.5)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = "#fff";
+            ctx.font = "30px Arial";
+            ctx.fillText('PAUSA', canvas.width / 2 - 50, canvas.height / 2);
+            botonPausa.textContent = 'Reanudar';
+        }else{
+            botonPausa.textContent = 'Pausa';
+            idRana = setInterval(pintarPersonaje, 1000 / 50);
+        }
+    });
+
+    botonReiniciar.addEventListener('click',() => {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+    });
+
 }
