@@ -5,9 +5,9 @@ window.onload = function(){
     let nObstaculos = [];
 
     const LIMITEIZQUIERDA = 0;
-    const LIMITEDERECHA = 565;
+    const LIMITEDERECHA = 575;
     const LIMITEARRIBA = 0;
-    const LIMITEABAJO = 365;
+    const LIMITEABAJO = 375;
 
     const LIMITECOCHEIZQUIERDA = -200;
     const LIMITECOCHEDERECHA = 600;
@@ -23,16 +23,21 @@ window.onload = function(){
     let yAbajo;
     let yArriba;
 
+    const botonIniciar = document.getElementById("seccionBotones").getElementsByTagName("button")[0];
+    const botonPausar = document.getElementById("seccionBotones").getElementsByTagName("button")[1];
+    const botonReiniciar = document.getElementById("seccionBotones").getElementsByTagName("button")[2];
+
     let pausa;
 
     let idRana;
+    let idMovimiento;
 
     class Rana {
         constructor(){
             this.x = canvas.width / 2;
             this.y = 350;
             this.velocidad = 50;
-            this.animacionRana = [[72,69],[317,68],[65,319],[265,317],[59,570],[310,568],[71,818],[318,765]];
+            this.animacionRana = [[45,57],[307,60],[49,303],[250,304],[48,559],[286,552],[53,801],[308,754]];
             this.tamañoX = 40;
             this.tamañoY = 40;
         }
@@ -134,20 +139,21 @@ window.onload = function(){
 
     function pintarPersonaje(){
         ctx.clearRect(0, 0, 600, 400);
-        
         ctx.fillStyle = "green";
         ctx.fillRect(rana.x,rana.y,rana.tamañoX,rana.tamañoY);
-        /*ctx.drawImage(
+
+        ctx.drawImage(
             rana.imagen,
             rana.animacionRana[posicion][0],
             rana.animacionRana[posicion][1],
-            111,
-            111,
+            130,
+            130,
             rana.x,
             rana.y,
             rana.tamañoX,
             rana.tamañoY
-        );*/
+        );
+
         movimientoObstaculos();
 
         if (ranaMuerta()) {
@@ -158,7 +164,7 @@ window.onload = function(){
 		}
     }
 
-    function movimimientoRana() {
+    function saltoRana() {
         if(xDerecha){
             inicial = 2;
             rana.moverDerecha();
@@ -195,10 +201,9 @@ window.onload = function(){
                 break;
             case 38: // Arriba
                 yArriba = true;
-                
                 break; 
         }
-        movimimientoRana();
+        saltoRana();
     }
 
     function desactivarMovimiento(evt) {
@@ -224,15 +229,15 @@ window.onload = function(){
 		
 		let i = 0;
 
-		let bIzq  = rana.x;
-		let bDer  = rana.x + rana.tamañoX;
+		let bIzq = rana.x;
+		let bDer = rana.x + rana.tamañoX;
 		let bDown = rana.y;
-		let bUp   = rana.y + rana.tamañoY;
+		let bUp = rana.y + rana.tamañoY;
 
 		do {
-			let nIzq  = Math.round(nObstaculos[i].x,0);
-			let nDer  = Math.round((nObstaculos[i].x + nObstaculos[i].ancho),0);
-			let nDown   = Math.round(nObstaculos[i].y,0);
+			let nIzq = Math.round(nObstaculos[i].x,0);
+			let nDer = Math.round((nObstaculos[i].x + nObstaculos[i].ancho),0);
+			let nDown = Math.round(nObstaculos[i].y,0);
 			let nUp = Math.round((nObstaculos[i].y + nObstaculos[i].alto),0);
 			
 			if (( bDer  > nIzq ) &
@@ -252,10 +257,6 @@ window.onload = function(){
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
 
-    let botonIniciar = document.getElementById("seccionBotones").getElementsByTagName("button")[0];
-    let botonPausar = document.getElementById("seccionBotones").getElementsByTagName("button")[1];
-    let botonReiniciar = document.getElementById("seccionBotones").getElementsByTagName("button")[2];
-
     botonIniciar.disabled = false;
     botonPausar.disabled = true;
     botonReiniciar.disabled = true;
@@ -270,6 +271,8 @@ window.onload = function(){
 
     botonIniciar.addEventListener('click',() => {
         idRana = setInterval(pintarPersonaje, 1000 / 50);
+        idMovimiento = setInterval(saltoRana,1000/1);
+
         botonIniciar.disabled = true;
         botonPausar.disabled = false;
     });
@@ -294,5 +297,4 @@ window.onload = function(){
     botonReiniciar.addEventListener('click',() => {
         ctx.clearRect(0,0,canvas.width,canvas.height);
     });
-
 }
