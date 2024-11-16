@@ -17,6 +17,8 @@ window.onload = function(){
 
     let posicion = 0; 
     let inicial = 0;
+    let puntuacion = 0;
+    let velocidadJuego = 1;
 
     let xDerecha;
     let xIzquierda;
@@ -40,6 +42,7 @@ window.onload = function(){
             this.animacionRana = [[45,57],[307,60],[49,303],[250,304],[48,559],[286,552],[53,801],[308,754]];
             this.tamañoX = 40;
             this.tamañoY = 40;
+            this.estado = "quieto";
         }
 
         moverDerecha(){
@@ -141,8 +144,8 @@ window.onload = function(){
         ctx.clearRect(0, 0, 600, 400);
         ctx.fillStyle = "green";
         ctx.fillRect(rana.x,rana.y,rana.tamañoX,rana.tamañoY);
-
-        ctx.drawImage(
+        
+        /*ctx.drawImage(
             rana.imagen,
             rana.animacionRana[posicion][0],
             rana.animacionRana[posicion][1],
@@ -152,7 +155,7 @@ window.onload = function(){
             rana.y,
             rana.tamañoX,
             rana.tamañoY
-        );
+        );*/
 
         movimientoObstaculos();
 
@@ -204,6 +207,14 @@ window.onload = function(){
                 break; 
         }
         saltoRana();
+
+        rana.estado = "saltando";
+        posicion = inicial + 1;
+
+        setTimeout(() => {
+            rana.estado = "quieto";
+            posicion = inicial;
+        }, 85);
     }
 
     function desactivarMovimiento(evt) {
@@ -221,65 +232,76 @@ window.onload = function(){
                 yArriba = false;
                 break; 
         }
+
+        if(rana.y <= 0) puntuacionJuego();
+        console.log(puntuacion);
     }
 
-
     function ranaMuerta() {
-		let estamosMuertos = false;
-		
-		let i = 0;
+        let estamosMuertos = false;
+        let i = 0;
+    
+        let rIzq = rana.x;
+        let rDer = rana.x + rana.tamañoX;
+        let rDown = rana.y;
+        let rUp = rana.y + rana.tamañoY;
+    
+        do {
+            if (i >= nObstaculos.length) break;
+    
+            let oIzq = Math.round(nObstaculos[i].x);
+            let oDer = Math.round(nObstaculos[i].x + nObstaculos[i].ancho);
+            let oDown = Math.round(nObstaculos[i].y);
+            let oUp = Math.round(nObstaculos[i].y + nObstaculos[i].alto);
+    
+            if ((rDer > oIzq) &&
+                (rIzq < oDer) &&
+                (rUp > oDown) &&
+                (rDown < oUp)) {
+                estamosMuertos = true;
+            } else {
+                i++;
+            }
+        } while (!estamosMuertos);
+    
+        return estamosMuertos;
+    }
 
-		let bIzq = rana.x;
-		let bDer = rana.x + rana.tamañoX;
-		let bDown = rana.y;
-		let bUp = rana.y + rana.tamañoY;
+    function puntuacionJuego(){
+        puntuacion++;
+        rana.x = canvas.width / 2; 
+        rana.y = 350;
+    }
 
-		do {
-			let nIzq = Math.round(nObstaculos[i].x,0);
-			let nDer = Math.round((nObstaculos[i].x + nObstaculos[i].ancho),0);
-			let nDown = Math.round(nObstaculos[i].y,0);
-			let nUp = Math.round((nObstaculos[i].y + nObstaculos[i].alto),0);
-			
-			if (( bDer  > nIzq ) &
-					( bIzq  < nDer ) &
-					( bUp   > nDown) &
-					( bDown < nUp) ) {
-				
-				estamosMuertos = true;
-				
-			} else i++;
-		}
-		while (!estamosMuertos);	
-		
-		return estamosMuertos;
-	}
+    function reiniciarJuego() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    canvas = document.getElementById('canvas');
-    ctx = canvas.getContext('2d');
+        nObstaculos = [];
+        posicion = 0;
+        inicial = 0;
+        xDerecha = false;
+        xIzquierda = false;
+        yAbajo = false;
+        yArriba = false;
 
-    botonIniciar.disabled = false;
-    botonPausar.disabled = true;
-    botonReiniciar.disabled = true;
+        rana = new Rana();
+        iniciarObstaculos();
 
-    document.addEventListener("keydown", activarMovimiento, false);
-    document.addEventListener("keyup", desactivarMovimiento, false);
+        botonIniciar.disabled = false;
+        botonPausar.disabled = true;
+        botonReiniciar.disabled = true;
 
-    imagen = new Image();
-    imagen.src = "imagenes/frogger.png";
-    Rana.prototype.imagen = imagen;
-    rana = new Rana();
+        if(botonPausar.textContent === "Reanudar"){
+            botonPausar.textContent = "Pausar"; 
+            pausa = false;
+        }
 
-    botonIniciar.addEventListener('click',() => {
-        idRana = setInterval(pintarPersonaje, 1000 / 50);
-        idMovimiento = setInterval(saltoRana,1000/1);
+        clearInterval(idRana);
+    }
 
-        botonIniciar.disabled = true;
-        botonPausar.disabled = false;
-    });
-
-    botonPausar.addEventListener('click',() => {
+    function pausarJuego() {
         pausa = !pausa;
-        if(pausa){
+        if (pausa) {
             clearInterval(idRana);
             ctx.fillStyle = "rgba(128, 128, 128, 0.5)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -288,13 +310,38 @@ window.onload = function(){
             ctx.font = "30px Arial";
             ctx.fillText('PAUSA', canvas.width / 2 - 50, canvas.height / 2);
             botonPausa.textContent = 'Reanudar';
-        }else{
+        } else {
             botonPausa.textContent = 'Pausa';
             idRana = setInterval(pintarPersonaje, 1000 / 50);
         }
-    });
+    }
 
-    botonReiniciar.addEventListener('click',() => {
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-    });
+    function iniciarJuego() {
+        idRana = setInterval(pintarPersonaje, 1000 / 50);
+        botonIniciar.disabled = true;
+        botonPausar.disabled = false;
+        botonReiniciar.disabled = false;
+    }
+
+    canvas = document.getElementById('canvas');
+    ctx = canvas.getContext('2d');
+
+    imagen = new Image();
+    imagen.src = "imagenes/frogger.png";
+
+    Rana.prototype.imagen = imagen;
+    rana = new Rana();
+
+    botonIniciar.disabled = false;
+    botonPausar.disabled = true;
+    botonReiniciar.disabled = true;
+
+    document.addEventListener("keydown", activarMovimiento, false);
+    document.addEventListener("keyup", desactivarMovimiento, false);
+
+    botonIniciar.addEventListener('click',iniciarJuego,false);
+    botonPausar.addEventListener('click',pausarJuego,false);
+    botonReiniciar.addEventListener('click',reiniciarJuego,false);
+
+    
 }
