@@ -5,9 +5,9 @@ window.onload = function(){
     let nObstaculos = [];
 
     const LIMITEIZQUIERDA = 0;
-    const LIMITEDERECHA = 575;
+    const LIMITEDERECHA = 560;
     const LIMITEARRIBA = 0;
-    const LIMITEABAJO = 375;
+    const LIMITEABAJO = 360;
 
     const LIMITECOCHEIZQUIERDA = -200;
     const LIMITECOCHEDERECHA = 600;
@@ -29,17 +29,22 @@ window.onload = function(){
     const botonPausar = document.getElementById("seccionBotones").getElementsByTagName("button")[1];
     const botonReiniciar = document.getElementById("seccionBotones").getElementsByTagName("button")[2];
 
+    const tronco = new Image();
+    tronco.src = "imagenes/log.png";
+
+    const vehiculo = new Image();
+    vehiculo.src = "imagenes/cars.png";
+
     let pausa;
 
     let idRana;
-    let idMovimiento;
 
     class Rana {
         constructor(){
             this.x = canvas.width / 2;
             this.y = 350;
-            this.velocidad = 50;
-            this.animacionRana = [[45,57],[307,60],[49,303],[250,304],[48,559],[286,552],[53,801],[308,754]];
+            this.velocidad = 40;
+            this.animacionRana = [[57,60],[307,77],[49,303],[300,304],[48,559],[286,552],[53,801],[308,754]];
             this.tamañoX = 40;
             this.tamañoY = 40;
             this.estado = "quieto";
@@ -75,19 +80,40 @@ window.onload = function(){
     }
 
     class Obstaculos {
-        constructor(x, y, alto, ancho, velocidad, color,tipo) {
+        constructor(x, y, alto, ancho, velocidad,tipo) {
             this.x = x;
             this.y = y;
             this.alto = alto;
             this.ancho = ancho;
             this.velocidad = velocidad;
-            this.color = color;
             this.tipo = tipo;
         }
     
         dibujar() {
-            ctx.fillStyle = this.color;
-            ctx.fillRect(this.x, this.y, this.ancho, this.alto);
+            switch (this.tipo) {
+                case "tronco":
+                    ctx.drawImage(
+                        tronco,
+                        this.x,
+                        this.y,
+                        this.ancho,
+                        this.alto
+                    );
+                    break;
+                case "vehiculo":
+                    ctx.drawImage(
+                        vehiculo,
+                        0,
+                        10,
+                        161,
+                        64,
+                        this.x,
+                        this.y,
+                        this.ancho,
+                        this.alto
+                    );
+                break;
+            }  
         }
     
         actualizar() {
@@ -108,27 +134,27 @@ window.onload = function(){
         // Primera fila de coches
         for(let i = 0; i < 2; i++) {
             let x = i * 350;
-            nObstaculos.push(new Obstaculos(x, 250, 50, 120, 1, "blue","vehiculo"));
+            nObstaculos.push(new Obstaculos(x, 285, 50, 120, 1,"vehiculo"));
         }
         // Segunda fila de coches
         for (let i = 0; i < 2; i++) {
             let x = i * 300;
-            nObstaculos.push(new Obstaculos(x, 200, 50, 120, -2, "blue","vehiculo"));
+            nObstaculos.push(new Obstaculos(x, 230, 50, 120, -2,"vehiculo"));
         }
         // Tercera fila de coches
         for (let i = 0; i < 2; i++) {
             let x = i * 400;
-            nObstaculos.push(new Obstaculos(x, 150, 50, 120, 2, "blue","vehiculo"));
+            nObstaculos.push(new Obstaculos(x, 175, 50, 120, 2,"vehiculo"));
         }
         //Cuarta fila de troncos
         for (let i = 0; i < 2; i++) {
             let x = i * 450;
-            nObstaculos.push(new Obstaculos(x, 100, 50, 120, 0.7, "blue","tronco"));
+            nObstaculos.push(new Obstaculos(x, 120, 50, 120, 0.7,"tronco"));
         }
         // Quita fila de troncos
         for (let i = 0; i < 2; i++) {
             let x = i * 500;
-            nObstaculos.push(new Obstaculos(x, 50, 50, 50, 1, "blue","tronco"));
+            nObstaculos.push(new Obstaculos(x, 60, 50, 50, 1,"tronco"));
         }
     }
     iniciarObstaculos();
@@ -142,20 +168,20 @@ window.onload = function(){
 
     function pintarPersonaje(){
         ctx.clearRect(0, 0, 600, 400);
-        ctx.fillStyle = "green";
-        ctx.fillRect(rana.x,rana.y,rana.tamañoX,rana.tamañoY);
+        /*ctx.fillStyle = "green";
+        ctx.fillRect(rana.x,rana.y,rana.tamañoX,rana.tamañoY);*/
         
-        /*ctx.drawImage(
+        ctx.drawImage(
             rana.imagen,
             rana.animacionRana[posicion][0],
             rana.animacionRana[posicion][1],
-            130,
-            130,
+            155,
+            155,
             rana.x,
             rana.y,
             rana.tamañoX,
             rana.tamañoY
-        );*/
+        );
 
         movimientoObstaculos();
 
@@ -211,10 +237,10 @@ window.onload = function(){
         rana.estado = "saltando";
         posicion = inicial + 1;
 
-        setTimeout(() => {
+       setTimeout(() => {
             rana.estado = "quieto";
             posicion = inicial;
-        }, 85);
+        }, 100);
     }
 
     function desactivarMovimiento(evt) {
@@ -233,8 +259,10 @@ window.onload = function(){
                 break; 
         }
 
-        if(rana.y <= 0) puntuacionJuego();
-        console.log(puntuacion);
+        if(rana.y <= 0) {
+            puntuacionJuego();
+        }
+        console.log("Puntuación jugador: "+puntuacion);
     }
 
     function ranaMuerta() {
@@ -247,7 +275,9 @@ window.onload = function(){
         let rUp = rana.y + rana.tamañoY;
     
         do {
-            if (i >= nObstaculos.length) break;
+            if (i >= nObstaculos.length){
+                break;
+            }
     
             let oIzq = Math.round(nObstaculos[i].x);
             let oDer = Math.round(nObstaculos[i].x + nObstaculos[i].ancho);
@@ -271,6 +301,14 @@ window.onload = function(){
         puntuacion++;
         rana.x = canvas.width / 2; 
         rana.y = 350;
+        // Aumentamos la velocidad de cada obstaculo
+        for(let i = 0;i < nObstaculos.length; i++){
+            if(nObstaculos[i].velocidad < 0 ){
+                nObstaculos[i].velocidad -= 0.05;
+            }else{
+                nObstaculos[i].velocidad += 0.05;
+            }
+        }
     }
 
     function reiniciarJuego() {
@@ -279,6 +317,7 @@ window.onload = function(){
         nObstaculos = [];
         posicion = 0;
         inicial = 0;
+        puntuacion = 0;
         xDerecha = false;
         xIzquierda = false;
         yAbajo = false;
