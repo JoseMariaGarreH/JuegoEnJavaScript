@@ -18,7 +18,6 @@ window.onload = function(){
     let posicion = 0; 
     let inicial = 0;
     let puntuacion = 0;
-    let velocidadJuego = 1;
 
     let xDerecha;
     let xIzquierda;
@@ -237,7 +236,7 @@ window.onload = function(){
         rana.estado = "saltando";
         posicion = inicial + 1;
 
-       setTimeout(() => {
+        setTimeout(() => {
             rana.estado = "quieto";
             posicion = inicial;
         }, 100);

@@ -3,7 +3,8 @@ body{
     padding: 0;
     height: 100vh;
     width: 100%;
-    background: url('imagenes/background.png') center no-repeat;
+    background: url('imagenes/background.png') center;
+    background-repeat: no-repeat;
     background-size: cover; 
     
     display: flex;
@@ -14,13 +15,13 @@ body{
 
 img{
     margin: 5px;
-    width: 200px;
+    width: 400px;
 }
 
 #canvas { 
     background: url('imagenes/background_lvl2.png') center;
     background-repeat: no-repeat;
-    background-size: 600px 420px;
+    background-size: 605px 420px;
     border-radius: 10px;
     border: solid 5px rgb(76, 57, 44);
 }
