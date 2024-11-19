@@ -18,6 +18,7 @@ window.onload = function(){
     let posicion = 0; 
     let inicial = 0;
     let puntuacion = 0;
+    let velocidadJuego = 1;
 
     let xDerecha;
     let xIzquierda;
@@ -86,6 +87,8 @@ window.onload = function(){
             this.ancho = ancho;
             this.velocidad = velocidad;
             this.tipo = tipo;
+            this.tipoCoche = Math.floor(Math.random() * 4);
+            this.coches = [[0,10],[160,11],[0,168],[160,164]];
         }
     
         dibujar() {
@@ -102,8 +105,8 @@ window.onload = function(){
                 case "vehiculo":
                     ctx.drawImage(
                         vehiculo,
-                        0,
-                        10,
+                        this.coches[this.tipoCoche][0],
+                        this.coches[this.tipoCoche][1],
                         161,
                         64,
                         this.x,
@@ -116,14 +119,17 @@ window.onload = function(){
         }
     
         actualizar() {
-            this.x += this.velocidad;
+            this.x += this.velocidad * velocidadJuego;
+            console.log(velocidadJuego);
             if(this.velocidad > 0){
                 if (this.x > LIMITECOCHEDERECHA + this.ancho) {
                     this.x = LIMITECOCHEIZQUIERDA;
+                    this.tipoCoche = Math.floor(Math.random() * 4);
                 }
             } else {
                 if (this.x < LIMITECOCHEIZQUIERDA - this.ancho) {
                     this.x = LIMITECOCHEDERECHA;
+                    this.tipoCoche = Math.floor(Math.random() * 4);
                 }
             }
         }
@@ -167,9 +173,6 @@ window.onload = function(){
 
     function pintarPersonaje(){
         ctx.clearRect(0, 0, 600, 400);
-        /*ctx.fillStyle = "green";
-        ctx.fillRect(rana.x,rana.y,rana.tamañoX,rana.tamañoY);*/
-        
         ctx.drawImage(
             rana.imagen,
             rana.animacionRana[posicion][0],
@@ -182,6 +185,7 @@ window.onload = function(){
             rana.tamañoY
         );
 
+        manejadorDePuntuacion();
         movimientoObstaculos();
 
         if (ranaMuerta()) {
@@ -231,6 +235,7 @@ window.onload = function(){
                 yArriba = true;
                 break; 
         }
+
         saltoRana();
 
         rana.estado = "saltando";
@@ -297,18 +302,23 @@ window.onload = function(){
     }
 
     function puntuacionJuego(){
+        ctx.clearRect(0, 0, 600, 400);
         puntuacion++;
         rana.x = canvas.width / 2; 
         rana.y = 350;
-        // Aumentamos la velocidad de cada obstaculo
-        for(let i = 0;i < nObstaculos.length; i++){
-            if(nObstaculos[i].velocidad < 0 ){
-                nObstaculos[i].velocidad -= 0.05;
-            }else{
-                nObstaculos[i].velocidad += 0.05;
-            }
-        }
+        velocidadJuego += 0.5;
     }
+
+    function manejadorDePuntuacion(){
+        ctx.strokeStyle = "black";
+        ctx.font = "10px Arial";
+        ctx.strokeText("Puntuación: "+puntuacion,530,10);
+
+        ctx.strokeStyle = "black";
+        ctx.font = "10px Arial";
+        ctx.strokeText("Velocidad: "+velocidadJuego.toFixed(1),530,25);
+    }
+
 
     function reiniciarJuego() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -341,7 +351,7 @@ window.onload = function(){
         pausa = !pausa;
         if (pausa) {
             clearInterval(idRana);
-            ctx.fillStyle = "rgba(128, 128, 128, 0.5)";
+            ctx.fillStyle = "#80808080";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             ctx.fillStyle = "#fff";
