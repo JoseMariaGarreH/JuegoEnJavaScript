@@ -29,11 +29,11 @@ window.onload = function(){
     const botonPausar = document.getElementById("seccionBotones").getElementsByTagName("button")[1];
     const botonReiniciar = document.getElementById("seccionBotones").getElementsByTagName("button")[2];
 
-    const tronco = new Image();
-    tronco.src = "imagenes/log.png";
+    const TRONCO = new Image();
+    TRONCO.src = "imagenes/log.png";
 
-    const vehiculo = new Image();
-    vehiculo.src = "imagenes/cars.png";
+    const VEHICULO = new Image();
+    VEHICULO.src = "imagenes/cars.png";
 
     let pausa;
 
@@ -47,7 +47,6 @@ window.onload = function(){
             this.animacionRana = [[57,60],[307,77],[49,303],[300,304],[48,559],[286,552],[53,801],[308,754]];
             this.tamañoX = 40;
             this.tamañoY = 40;
-            this.estado = "quieto";
         }
 
         moverDerecha(){
@@ -87,15 +86,14 @@ window.onload = function(){
             this.ancho = ancho;
             this.velocidad = velocidad;
             this.tipo = tipo;
-            this.tipoCoche = Math.floor(Math.random() * 4);
-            this.coches = [[0,10],[160,11],[0,168],[160,164]];
+            this.randomizador = Math.floor(Math.random() * 3);
         }
-    
+
         dibujar() {
             switch (this.tipo) {
                 case "tronco":
                     ctx.drawImage(
-                        tronco,
+                        TRONCO,
                         this.x,
                         this.y,
                         this.ancho,
@@ -103,33 +101,47 @@ window.onload = function(){
                     );
                     break;
                 case "vehiculo":
-                    ctx.drawImage(
-                        vehiculo,
-                        this.coches[this.tipoCoche][0],
-                        this.coches[this.tipoCoche][1],
-                        161,
-                        64,
-                        this.x,
-                        this.y,
-                        this.ancho,
-                        this.alto
-                    );
+                    if(this.velocidad > 0){
+                        ctx.drawImage(
+                            VEHICULO,
+                            this.imagenesCochesDerecha[this.randomizador][0],
+                            this.imagenesCochesDerecha[this.randomizador][1],
+                            161,
+                            64,
+                            this.x,
+                            this.y,
+                            this.ancho,
+                            this.alto
+                        );
+                    }else{
+                        ctx.drawImage(
+                            VEHICULO,
+                            this.imagenesCochesIzquierda[this.randomizador][0],
+                            this.imagenesCochesIzquierda[this.randomizador][1],
+                            161,
+                            64,
+                            this.x,
+                            this.y,
+                            this.ancho,
+                            this.alto
+                        );
+                    }
                 break;
             }  
         }
     
         actualizar() {
             this.x += this.velocidad * velocidadJuego;
-            console.log(velocidadJuego);
+            console.log(this.randomizador);
             if(this.velocidad > 0){
                 if (this.x > LIMITECOCHEDERECHA + this.ancho) {
                     this.x = LIMITECOCHEIZQUIERDA;
-                    this.tipoCoche = Math.floor(Math.random() * 4);
+                    this.randomizador = Math.floor(Math.random() * 3);
                 }
             } else {
                 if (this.x < LIMITECOCHEIZQUIERDA - this.ancho) {
                     this.x = LIMITECOCHEDERECHA;
-                    this.tipoCoche = Math.floor(Math.random() * 4);
+                    this.randomizador = Math.floor(Math.random() * 3);
                 }
             }
         }
@@ -140,6 +152,7 @@ window.onload = function(){
         for(let i = 0; i < 2; i++) {
             let x = i * 350;
             nObstaculos.push(new Obstaculos(x, 285, 50, 120, 1,"vehiculo"));
+            
         }
         // Segunda fila de coches
         for (let i = 0; i < 2; i++) {
@@ -238,11 +251,9 @@ window.onload = function(){
 
         saltoRana();
 
-        rana.estado = "saltando";
         posicion = inicial + 1;
 
         setTimeout(() => {
-            rana.estado = "quieto";
             posicion = inicial;
         }, 100);
     }
@@ -266,7 +277,6 @@ window.onload = function(){
         if(rana.y <= 0) {
             puntuacionJuego();
         }
-        console.log("Puntuación jugador: "+puntuacion);
     }
 
     function ranaMuerta() {
@@ -331,6 +341,7 @@ window.onload = function(){
         xIzquierda = false;
         yAbajo = false;
         yArriba = false;
+        velocidadJuego = 1;
 
         rana = new Rana();
         iniciarObstaculos();
@@ -379,6 +390,10 @@ window.onload = function(){
 
     Rana.prototype.imagen = imagen;
     rana = new Rana();
+
+    Obstaculos.prototype.imagenesCochesDerecha = [[0, 10], [0, 168], [0, 86]];
+    Obstaculos.prototype.imagenesCochesIzquierda = [[160, 11], [160, 164], [161, 86]];
+    Obstaculos.prototype.randomizador = Math.floor(Math.random() * 3);
 
     botonIniciar.disabled = false;
     botonPausar.disabled = true;
