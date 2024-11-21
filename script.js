@@ -2,8 +2,6 @@ window.onload = function(){
     let canvas;
     let ctx;
 
-    let nObstaculos = [];
-
     const LIMITEIZQUIERDA = 0;
     const LIMITEDERECHA = 560;
     const LIMITEARRIBA = 0;
@@ -12,6 +10,9 @@ window.onload = function(){
     const LIMITECOCHEIZQUIERDA = -200;
     const LIMITECOCHEDERECHA = 600;
 
+    let arrayCoches = [];
+    let arrayTroncos = [];
+
     let rana;
     let imagen;
 
@@ -19,6 +20,7 @@ window.onload = function(){
     let inicial = 0;
     let puntuacion = 0;
     let velocidadJuego = 1;
+    let asalvo = false;
 
     let xDerecha;
     let xIzquierda;
@@ -154,40 +156,63 @@ window.onload = function(){
         // Primera fila de coches
         for(let i = 0; i < 2; i++) {
             let x = i * 350;
-            nObstaculos.push(new Obstaculos(x, 285, 50, 100, 1,"vehiculo"));
+            arrayCoches.push(new Obstaculos(x, 285, 50, 100, 1,"vehiculo"));
         }
         // Segunda fila de coches
         for (let i = 0; i < 2; i++) {
             let x = i * 300;
-            nObstaculos.push(new Obstaculos(x, 230, 50, 100, -2,"vehiculo"));
+            arrayCoches.push(new Obstaculos(x, 230, 50, 100, -2,"vehiculo"));
         }
         // Tercera fila de coches
         for (let i = 0; i < 2; i++) {
             let x = i * 400;
-            nObstaculos.push(new Obstaculos(x, 175, 50, 100, 2,"vehiculo"));
+            arrayCoches.push(new Obstaculos(x, 175, 50, 100, 2,"vehiculo"));
         }
         //Cuarta fila de troncos
         for (let i = 0; i < 2; i++) {
             let x = i * 450;
-            nObstaculos.push(new Obstaculos(x, 120, 50, 100, 0.7,"tronco"));
+            arrayTroncos.push(new Obstaculos(x, 120, 50, 100, 0.7,"tronco"));
         }
         // Quita fila de troncos
         for (let i = 0; i < 2; i++) {
             let x = i * 500;
-            nObstaculos.push(new Obstaculos(x, 60, 50, 50, 1,"tronco"));
+            arrayTroncos.push(new Obstaculos(x, 60, 50, 50, 1,"tronco"));
         }
     }
     iniciarObstaculos();
 
     function movimientoObstaculos() {
-        for (let i = 0; i < nObstaculos.length; i++) {
-            nObstaculos[i].actualizar();
-            nObstaculos[i].dibujar();
+        for (let i = 0; i < arrayCoches.length; i++) {
+            arrayCoches[i].actualizar();
+            arrayCoches[i].dibujar();
+        }
+
+        for (let i = 0; i < arrayTroncos.length; i++) {
+            arrayTroncos[i].actualizar();
+            arrayTroncos[i].dibujar();
+        }
+
+        if(rana.y < 160 && rana.y > 40){
+            asalvo = false;
+            for (let i = 0; i < arrayTroncos.length; i++) {
+                if(colisiones(arrayTroncos)){
+                    rana.y = arrayTroncos[i].y;
+                    rana.x += arrayTroncos[i].velocidad;
+                    asalvo = true;
+                    break;
+                }
+            }
+
+            if(!asalvo){
+                clearInterval(idRana);
+            }
         }
     }
 
     function pintarPersonaje(){
         ctx.clearRect(0, 0, 600, 400);
+
+        movimientoObstaculos();
         ctx.drawImage(
             rana.imagen,
             rana.animacionRana[posicion][0],
@@ -201,9 +226,8 @@ window.onload = function(){
         );
 
         manejadorDePuntuacion();
-        movimientoObstaculos();
-
-        if (ranaMuerta()) {
+        
+        if (colisiones(arrayCoches)) {
 			clearInterval(idRana);
 
             audioMuerte.currentTime = 0;
@@ -214,12 +238,6 @@ window.onload = function(){
             botonReiniciar.disabled = false;
 		}
     }
-
-    function reproducirAudio() {
-		// Si hay un sonido reproduciéndose retrocedemos su reproducción hasta 0 para que vuelva a sonar desde el principio. 
-		audioSalto.currentTime = 0;
-		audioSalto.play();
-	}	
 
     // Calculo del sprite que se debe usar, según la dirección que coja
     function saltoRana() {
@@ -270,7 +288,8 @@ window.onload = function(){
 
         if (xDerecha || xIzquierda || yArriba || yAbajo) {
             saltoRana();
-            reproducirAudio();
+            audioSalto.currentTime = 0;
+            audioSalto.play();
         }
     }
 
@@ -301,13 +320,13 @@ window.onload = function(){
         }
     }
 
-    // Método que comprueba si ha habido alguna colisión entre la rana y los obstaculos
-    function ranaMuerta() {
-        let estamosMuertos = false;
+    // Método que comprueba si ha habido alguna colisión entre los objetos y la rana
+    function colisiones(arrayObstaculos) {
+        let colision = false;
         let i = 0;
 
-        const margenRana = 7;
-        const margenObstaculo = 7;
+        const margenRana = 5;
+        const margenObstaculo = 5;
 
         let rIzq = rana.x + margenRana;
         let rDer = rana.x + rana.tamañoX - margenRana;
@@ -315,26 +334,26 @@ window.onload = function(){
         let rUp = rana.y + rana.tamañoY - margenRana;
     
         do {
-            if (i >= nObstaculos.length){
+            if (i >= arrayObstaculos.length){
                 break;
             }
-            
-            let oIzq = Math.round(nObstaculos[i].x + margenObstaculo);
-            let oDer = Math.round(nObstaculos[i].x + nObstaculos[i].ancho - margenObstaculo);
-            let oDown = Math.round(nObstaculos[i].y + margenObstaculo);
-            let oUp = Math.round(nObstaculos[i].y + nObstaculos[i].alto - margenObstaculo);
-    
+
+            let oIzq = Math.round(arrayObstaculos[i].x + margenObstaculo);
+            let oDer = Math.round(arrayObstaculos[i].x + arrayObstaculos[i].ancho - margenObstaculo);
+            let oDown = Math.round(arrayObstaculos[i].y + margenObstaculo);
+            let oUp = Math.round(arrayObstaculos[i].y + arrayObstaculos[i].alto - margenObstaculo);
+
             if ((rDer > oIzq) &&
                 (rIzq < oDer) &&
                 (rUp > oDown) &&
                 (rDown < oUp)) {
-                estamosMuertos = true;
+                colision = true;
             } else {
                 i++;
             }
-        } while (!estamosMuertos);
+        } while (!colision);
     
-        return estamosMuertos;
+        return colision;
     }
 
     function manejadorDePuntuacion(){
@@ -351,7 +370,9 @@ window.onload = function(){
     function reiniciarJuego() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        nObstaculos = [];
+        arrayCoches = [];
+        arrayTroncos = [];
+
         posicion = 0;
         inicial = 0;
         puntuacion = 0;
@@ -374,9 +395,6 @@ window.onload = function(){
         }
 
         clearInterval(idRana);
-
-        /*audioJuego.currentTime = 0;
-        audioJuego.pause();*/
     }
 
     function pausarJuego() {
@@ -390,11 +408,9 @@ window.onload = function(){
             ctx.font = "30px Arial";
             ctx.fillText('PAUSA', canvas.width / 2 - 50, canvas.height / 2);
             botonPausa.textContent = 'Reanudar';
-            //audioJuego.pause();
         } else {
             botonPausa.textContent = 'Pausa';
             idRana = setInterval(pintarPersonaje, 1000 / 50);
-            //audioJuego.play();
         }
     }
 
@@ -403,9 +419,6 @@ window.onload = function(){
         botonIniciar.disabled = true;
         botonPausar.disabled = false;
         botonReiniciar.disabled = false;
-
-        //audioJuego.volume = 0.5;
-        //audioJuego.play();
     }
 
     canvas = document.getElementById('canvas');
@@ -418,7 +431,6 @@ window.onload = function(){
     rana = new Rana();
 
     audioSalto = document.getElementById("audioSalto");
-    //audioJuego = document.getElementById("audioJuego");
     audioMuerte = document.getElementById("audioMuerte");
     audioMeta = document.getElementById("audioMeta");
     
