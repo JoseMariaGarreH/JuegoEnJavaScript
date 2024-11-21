@@ -42,7 +42,9 @@ window.onload = function(){
     const VEHICULO = new Image();
     VEHICULO.src = "imagenes/cars.png";
 
+    let muerte;
     let pausa;
+    let victoria;
 
     let idRana;
 
@@ -51,7 +53,7 @@ window.onload = function(){
             this.x = canvas.width / 2;
             this.y = 350;
             this.velocidad = 40;
-            this.animacionRana = [[57,60],[307,77],[49,303],[300,304],[48,559],[286,552],[53,801],[308,754]];
+            this.animacionRana = [[57,60],[307,77],[49,303],[300,304],[48,559],[286,552],[53,801],[308,788]];
             this.tamañoX = 40;
             this.tamañoY = 40;
         }
@@ -171,17 +173,17 @@ window.onload = function(){
         //Cuarta fila de troncos
         for (let i = 0; i < 2; i++) {
             let x = i * 450;
-            arrayTroncos.push(new Obstaculos(x, 120, 50, 100, 0.7,"tronco"));
+            arrayTroncos.push(new Obstaculos(x, 120, 50, 100, -1.5,"tronco"));
         }
         // Quita fila de troncos
-        for (let i = 0; i < 2; i++) {
-            let x = i * 500;
-            arrayTroncos.push(new Obstaculos(x, 60, 50, 50, 1,"tronco"));
+        for (let i = 0; i < 6; i++) {
+            let x = i * 150;
+            arrayTroncos.push(new Obstaculos(x, 60, 60, 60, 0.7,"tronco"));
         }
     }
     iniciarObstaculos();
 
-    function movimientoObstaculos() {
+    function manejadorDeObstaculos() {
         for (let i = 0; i < arrayCoches.length; i++) {
             arrayCoches[i].actualizar();
             arrayCoches[i].dibujar();
@@ -192,19 +194,27 @@ window.onload = function(){
             arrayTroncos[i].dibujar();
         }
 
+        // Comprobación de la colisión con los coches
+        for(let i = 0;i < arrayCoches.length;i++){
+            if(colision(arrayCoches[i])){
+                manejadorDeMuerte();
+            }
+        }
+
+        // Comprobación de la colisión con los troncos
         if(rana.y < 160 && rana.y > 40){
             asalvo = false;
             for (let i = 0; i < arrayTroncos.length; i++) {
-                if(colisiones(arrayTroncos)){
+                if(colision(arrayTroncos[i])){
                     rana.y = arrayTroncos[i].y;
-                    rana.x += arrayTroncos[i].velocidad;
+                    rana.x += arrayTroncos[i].velocidad * velocidadJuego;
                     asalvo = true;
                     break;
                 }
             }
 
             if(!asalvo){
-                clearInterval(idRana);
+                manejadorDeMuerte();
             }
         }
     }
@@ -212,7 +222,7 @@ window.onload = function(){
     function pintarPersonaje(){
         ctx.clearRect(0, 0, 600, 400);
 
-        movimientoObstaculos();
+        manejadorDeObstaculos();
         ctx.drawImage(
             rana.imagen,
             rana.animacionRana[posicion][0],
@@ -226,17 +236,6 @@ window.onload = function(){
         );
 
         manejadorDePuntuacion();
-        
-        if (colisiones(arrayCoches)) {
-			clearInterval(idRana);
-
-            audioMuerte.currentTime = 0;
-            audioMuerte.play();
-
-			botonPausar.disabled = true;
-            botonIniciar.disabled = true;
-            botonReiniciar.disabled = false;
-		}
     }
 
     // Calculo del sprite que se debe usar, según la dirección que coja
@@ -320,11 +319,22 @@ window.onload = function(){
         }
     }
 
-    // Método que comprueba si ha habido alguna colisión entre los objetos y la rana
-    function colisiones(arrayObstaculos) {
-        let colision = false;
-        let i = 0;
+    function manejadorDeMuerte(){
+        clearInterval(idRana);
 
+        audioMuerte.currentTime = 0;
+        audioMuerte.play();
+
+        document.removeEventListener("keydown", activarMovimiento, false);
+        document.removeEventListener("keyup", desactivarMovimiento, false);
+
+        botonPausar.disabled = true;
+        botonIniciar.disabled = true;
+        botonReiniciar.disabled = false;
+    }
+
+    // Método que comprueba si ha habido alguna colisión entre los obstaculos y la rana
+    function colision(obstaculo) {
         const margenRana = 5;
         const margenObstaculo = 5;
 
@@ -332,28 +342,18 @@ window.onload = function(){
         let rDer = rana.x + rana.tamañoX - margenRana;
         let rDown = rana.y + margenRana;
         let rUp = rana.y + rana.tamañoY - margenRana;
-    
-        do {
-            if (i >= arrayObstaculos.length){
-                break;
-            }
 
-            let oIzq = Math.round(arrayObstaculos[i].x + margenObstaculo);
-            let oDer = Math.round(arrayObstaculos[i].x + arrayObstaculos[i].ancho - margenObstaculo);
-            let oDown = Math.round(arrayObstaculos[i].y + margenObstaculo);
-            let oUp = Math.round(arrayObstaculos[i].y + arrayObstaculos[i].alto - margenObstaculo);
+        let oIzq = Math.round(obstaculo.x + margenObstaculo);
+        let oDer = Math.round(obstaculo.x + obstaculo.ancho - margenObstaculo);
+        let oDown = Math.round(obstaculo.y + margenObstaculo);
+        let oUp = Math.round(obstaculo.y + obstaculo.alto - margenObstaculo);
 
-            if ((rDer > oIzq) &&
-                (rIzq < oDer) &&
-                (rUp > oDown) &&
-                (rDown < oUp)) {
-                colision = true;
-            } else {
-                i++;
-            }
-        } while (!colision);
-    
-        return colision;
+        return (
+            rDer > oIzq &&
+            rIzq < oDer &&
+            rUp > oDown &&
+            rDown < oUp
+        );
     }
 
     function manejadorDePuntuacion(){
@@ -385,6 +385,9 @@ window.onload = function(){
         rana = new Rana();
         iniciarObstaculos();
 
+        document.removeEventListener("keydown", activarMovimiento, false);
+        document.removeEventListener("keyup", desactivarMovimiento, false);
+
         botonIniciar.disabled = false;
         botonPausar.disabled = true;
         botonReiniciar.disabled = true;
@@ -408,14 +411,24 @@ window.onload = function(){
             ctx.font = "30px Arial";
             ctx.fillText('PAUSA', canvas.width / 2 - 50, canvas.height / 2);
             botonPausa.textContent = 'Reanudar';
+
+            document.removeEventListener("keydown", activarMovimiento, false);
+            document.removeEventListener("keyup", desactivarMovimiento, false);
         } else {
             botonPausa.textContent = 'Pausa';
             idRana = setInterval(pintarPersonaje, 1000 / 50);
+
+            document.addEventListener("keydown", activarMovimiento, false);
+            document.addEventListener("keyup", desactivarMovimiento, false);
         }
     }
 
     function iniciarJuego() {
         idRana = setInterval(pintarPersonaje, 1000 / 50);
+
+        document.addEventListener("keydown", activarMovimiento, false);
+        document.addEventListener("keyup", desactivarMovimiento, false);
+
         botonIniciar.disabled = true;
         botonPausar.disabled = false;
         botonReiniciar.disabled = false;
@@ -441,9 +454,6 @@ window.onload = function(){
     botonIniciar.disabled = false;
     botonPausar.disabled = true;
     botonReiniciar.disabled = true;
-
-    document.addEventListener("keydown", activarMovimiento, false);
-    document.addEventListener("keyup", desactivarMovimiento, false);
 
     botonIniciar.addEventListener('click',iniciarJuego,false);
     botonPausar.addEventListener('click',pausarJuego,false);
