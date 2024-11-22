@@ -12,6 +12,7 @@ window.onload = function(){
 
     let arrayCoches = [];
     let arrayTroncos = [];
+    let puntuacionMax = [];
 
     let rana;
     let imagen;
@@ -21,6 +22,7 @@ window.onload = function(){
     let puntuacion = 0;
     let velocidadJuego = 1;
     let asalvo = false;
+    let muerte = false;
 
     let xDerecha;
     let xIzquierda;
@@ -42,9 +44,7 @@ window.onload = function(){
     const VEHICULO = new Image();
     VEHICULO.src = "imagenes/cars.png";
 
-    let muerte;
     let pausa;
-    let victoria;
 
     let idRana;
 
@@ -197,7 +197,7 @@ window.onload = function(){
         // Comprobación de la colisión con los coches
         for(let i = 0;i < arrayCoches.length;i++){
             if(colision(arrayCoches[i])){
-                manejadorDeMuerte();
+                muerte = true;
             }
         }
 
@@ -214,7 +214,7 @@ window.onload = function(){
             }
 
             if(!asalvo){
-                manejadorDeMuerte();
+                muerte = true;
             }
         }
     }
@@ -236,6 +236,8 @@ window.onload = function(){
         );
 
         manejadorDePuntuacion();
+        if(muerte){manejadorDeMuerte();}
+        
     }
 
     // Calculo del sprite que se debe usar, según la dirección que coja
@@ -311,6 +313,7 @@ window.onload = function(){
         // Si llega a la parte de arriba del canvas gana la "ronda" y suma su puntuación
         if(rana.y <= 0) {
             puntuacion++;
+            puntuacionMax.push(puntuacion);
             rana.x = canvas.width / 2; 
             rana.y = 350;
             velocidadJuego += 0.5;
@@ -327,6 +330,15 @@ window.onload = function(){
 
         document.removeEventListener("keydown", activarMovimiento, false);
         document.removeEventListener("keyup", desactivarMovimiento, false);
+
+        ctx.fillStyle = "#80808080";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = "#fff";
+        ctx.font = "30px Arial";
+        ctx.fillText("GAME OVER", canvas.width / 2 - 88, canvas.height / 2);
+        ctx.font = "15px Arial"
+        ctx.fillText("Puntuación: "+puntuacion, canvas.width / 2 - 43, canvas.height / 2 + 35);
 
         botonPausar.disabled = true;
         botonIniciar.disabled = true;
@@ -359,7 +371,7 @@ window.onload = function(){
     function manejadorDePuntuacion(){
         ctx.strokeStyle = "black";
         ctx.font = "10px Arial";
-        ctx.strokeText("Puntuación: "+puntuacion,530,10);
+        ctx.strokeText("Record: "+puntuacion,530,10);
 
         ctx.strokeStyle = "black";
         ctx.font = "10px Arial";
@@ -380,6 +392,8 @@ window.onload = function(){
         xIzquierda = false;
         yAbajo = false;
         yArriba = false;
+        muerte = false;
+        asalvo = false;
         velocidadJuego = 1;
 
         rana = new Rana();
