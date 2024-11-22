@@ -12,7 +12,6 @@ window.onload = function(){
 
     let arrayCoches = [];
     let arrayTroncos = [];
-    let puntuacionMax = [];
 
     let rana;
     let imagen;
@@ -36,7 +35,6 @@ window.onload = function(){
     let audioMeta;
     let audioSalto;
     let audioMuerte;
-
 
     const TRONCO = new Image();
     TRONCO.src = "imagenes/log.png";
@@ -313,7 +311,6 @@ window.onload = function(){
         // Si llega a la parte de arriba del canvas gana la "ronda" y suma su puntuación
         if(rana.y <= 0) {
             puntuacion++;
-            puntuacionMax.push(puntuacion);
             rana.x = canvas.width / 2; 
             rana.y = 350;
             velocidadJuego += 0.5;
@@ -337,8 +334,8 @@ window.onload = function(){
         ctx.fillStyle = "#fff";
         ctx.font = "30px Arial";
         ctx.fillText("GAME OVER", canvas.width / 2 - 88, canvas.height / 2);
-        ctx.font = "15px Arial"
-        ctx.fillText("Puntuación: "+puntuacion, canvas.width / 2 - 43, canvas.height / 2 + 35);
+        ctx.font = "12px Arial"
+        ctx.fillText("Puntuación: "+puntuacion, canvas.width / 2 - 36, canvas.height / 2 + 35);
 
         botonPausar.disabled = true;
         botonIniciar.disabled = true;
@@ -371,13 +368,26 @@ window.onload = function(){
     function manejadorDePuntuacion(){
         ctx.strokeStyle = "black";
         ctx.font = "10px Arial";
-        ctx.strokeText("Record: "+puntuacion,530,10);
 
+        // Recuperar el máximo puntaje almacenado
+        maximo = sessionStorage.getItem("PuntuacionMAX");
+        if (maximo === null) {
+            maximo = 0; // Si no hay puntaje máximo almacenado, ponemos 0
+        } else {
+            maximo = parseInt(maximo);
+        }
+
+        // Actualizar el sessionStorage con el nuevo puntaje máximo si cumple la codición
+        if (puntuacion > maximo) {
+            maximo = puntuacion;
+            sessionStorage.setItem("PuntuacionMAX", maximo);
+        }
+
+    ctx.strokeText("Record: " + maximo, 530, 10);
         ctx.strokeStyle = "black";
         ctx.font = "10px Arial";
         ctx.strokeText("Velocidad: "+velocidadJuego.toFixed(1),530,25);
     }
-
 
     function reiniciarJuego() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
