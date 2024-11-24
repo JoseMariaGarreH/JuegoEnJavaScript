@@ -8,25 +8,39 @@ body{
     background-size: cover; 
     
     display: flex;
-    justify-content: center;
     align-items: center;
     flex-direction: column;
 }
 
 p{
+    margin-top: 50px;
+    margin-bottom: 50px;
     font-family: 'PixelFont', monospace;
-    font-size: 18px; 
+    font-size: 24px; 
     color: white;
     text-align: center;
     line-height: 1.5;
 }
 
 img{
-    margin: 5px;
+    margin-top: 15px;
     width: 250px;
 }
 
-#canvas { 
+button {
+    background-color: #4CAF50;
+    border-radius: 10px; 
+    color: white;
+    font-size: 15px; 
+    cursor: pointer;
+}
+
+button:hover{
+    background-color: #458d47;
+    transform: scale(1.09,1.09);
+}
+
+#canvas {
     background: url('imagenes/background_lvl2.png') center;
     background-repeat: no-repeat;
     background-size: 605px 420px;
@@ -35,8 +49,6 @@ img{
 }
 
 #seccionBotones {
-    display: flex;
-    justify-content: left;
     margin-top: 20px;
 }
 

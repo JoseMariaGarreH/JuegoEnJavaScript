@@ -20,6 +20,7 @@ window.onload = function(){
     let inicial = 0;
     let puntuacion = 0;
     let velocidadJuego = 1;
+
     let asalvo = false;
     let muerte = false;
 
@@ -335,7 +336,7 @@ window.onload = function(){
         ctx.font = "30px Arial";
         ctx.fillText("GAME OVER", canvas.width / 2 - 88, canvas.height / 2);
         ctx.font = "12px Arial"
-        ctx.fillText("Puntuación: "+puntuacion, canvas.width / 2 - 36, canvas.height / 2 + 35);
+        ctx.fillText("Puntuación: "+puntuacion, canvas.width / 2 - 30, canvas.height / 2 + 35);
 
         botonPausar.disabled = true;
         botonIniciar.disabled = true;
@@ -378,15 +379,16 @@ window.onload = function(){
         }
 
         // Actualizar el sessionStorage con el nuevo puntaje máximo si cumple la codición
-        if (puntuacion > maximo) {
+        if (puntuacion > maximo && muerte) {
             maximo = puntuacion;
             sessionStorage.setItem("PuntuacionMAX", maximo);
         }
 
-    ctx.strokeText("Record: " + maximo, 530, 10);
+        ctx.strokeText("Record: " + maximo, 530, 15);
+        ctx.strokeText("Puntuación: "+puntuacion,530,25);
         ctx.strokeStyle = "black";
         ctx.font = "10px Arial";
-        ctx.strokeText("Velocidad: "+velocidadJuego.toFixed(1),530,25);
+        ctx.strokeText("Velocidad: "+velocidadJuego.toFixed(1),530,35);
     }
 
     function reiniciarJuego() {
