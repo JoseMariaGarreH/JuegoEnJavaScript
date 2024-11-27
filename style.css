@@ -40,6 +40,14 @@ button:hover{
     transform: scale(1.09,1.09);
 }
 
+button:disabled{
+    background-color: #536354;
+    border-radius: 10px; 
+    color: white;
+    font-size: 15px; 
+    cursor: pointer;
+}
+
 #canvas {
     background: url('imagenes/background_lvl2.png') center;
     background-repeat: no-repeat;
