@@ -45,6 +45,16 @@ window.onload = function(){
     let audioSalto;
     let audioMuerte;
     let audioAgua;
+    let audioJuego;
+
+    // Recogemos los audios de antes
+    audioSalto = document.getElementById("audioSalto");
+    audioMuerte = document.getElementById("audioMuerte");
+    audioMeta = document.getElementById("audioMeta");
+    audioAgua = document.getElementById("audioMuerteAgua");
+    audioJuego = document.getElementById("audioJuego");
+
+    audioJuego.loop=true;
 
     //Imagen del tronco
     const TRONCO = new Image();
@@ -368,6 +378,9 @@ window.onload = function(){
     function manejadorDeMuerte(){
         // Pausamos el bucle producido por el setInterval
         clearInterval(idRana);
+        
+        audioJuego.pause();
+        audioJuego.currentTime = 0;
 
         // Reproducimos el audio de muerte según en la posición en la que este
         if(rana.y < 160 && rana.y > 40){
@@ -504,11 +517,15 @@ window.onload = function(){
             ctx.fillText('PAUSA', canvas.width / 2 - 50, canvas.height / 2);
             botonPausa.textContent = 'Reanudar';
 
+            audioJuego.pause();
+
             document.removeEventListener("keydown", activarMovimiento, false);
             document.removeEventListener("keyup", desactivarMovimiento, false);
         } else {
             botonPausa.textContent = 'Pausa';
             idRana = setInterval(bucleJuego, 1000 / 50); // Vuelve a reanudar el juego
+
+            audioJuego.play();
 
             document.addEventListener("keydown", activarMovimiento, false);
             document.addEventListener("keyup", desactivarMovimiento, false);
@@ -518,6 +535,9 @@ window.onload = function(){
     // Función que inicia el juego
     function iniciarJuego() {
         idRana = setInterval(bucleJuego, 1000 / 50);
+
+        audioJuego.currentTime = 0;
+        audioJuego.play();
 
         document.addEventListener("keydown", activarMovimiento, false);
         document.addEventListener("keyup", desactivarMovimiento, false);
@@ -537,12 +557,6 @@ window.onload = function(){
 
     Rana.prototype.imagen = imagen;
     rana = new Rana();
-
-    // Recogemos los audios de antes
-    audioSalto = document.getElementById("audioSalto");
-    audioMuerte = document.getElementById("audioMuerte");
-    audioMeta = document.getElementById("audioMeta");
-    audioAgua = document.getElementById("audioMuerteAgua");
     
     // Definimos los sprites de los coches según su dirección y definimos un numero random del 0 al 3
     Obstaculos.prototype.imagenesCochesDerecha = [[0, 10], [0, 168], [0, 86]];
